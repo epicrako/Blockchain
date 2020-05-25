@@ -1,0 +1,325 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>My Shop</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <!-- Application -->
+  <link href="css/app.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="jumbotron text-center">
+      <h1>My Shop</h1>
+    </div>
+
+    <div class="col-md-12" id="item-list">
+      <div class="row">
+        <div class="col-lg-12">
+          <p id="account" class="welcome pull-right"></p>
+          <p id="accountBalance" class="welcome pull-left"></p>
+        </div>
+      </div>
+
+
+      <div class="row panel panel-default">
+        <div class="panel-heading clearfix">
+          <div class="panel-title">
+            <button class="btn btn-info btn-lg pull-left btn-event btn-unsubscribe" onclick="App.stopListeningToEvents(); return false;">Unsubscribe</button>
+            <button class="btn btn-info btn-lg pull-left btn-event btn-subscribe" style="display: none" onclick="App.listenToEvents(); return false;">Subscribe</button>
+            <button class="btn btn-info btn-lg pull-left btn-event btn-orders" onclick="App.toggleOrders(); return false;">Toggle orders</button>
+            <button class="btn btn-info btn-lg pull-left btn-show-events" data-toggle="collapse" data-target="#events" aria-expanded="false"
+                    aria-controls="events">Show Events</button>
+            <button class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#sellItem" id="sellbtn">Sell an item</button>
+            <button class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#withdrawFunds" id="withbtn">Withdraw funds</button>
+            <button class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#registerBuyer">Register new buyer</button>
+          </div>
+        </div>
+        <ul id="events" class="collapse list-group"></ul>
+      </div>
+      <div id="particles-js" class="first"></div>
+      <div id="itemsRow" class="row">
+        <!-- ALL ITEMS -->
+      </div>
+      <div style="display: none;" id="ordersRow" class="row">
+        <!-- ALL ORDERS -->
+      </div>
+    </div>
+  </div>
+
+  <div id="itemTemplate" style="display: none;">
+    <div class="row-lg-12">
+      <div class="panel panel-default panel-item">
+        <div class="panel-heading">
+          <h3 class="panel-title"></h3>
+        </div>
+        <div class="panel-body">
+          <strong>Description</strong>: <span class="item-description"></span><br />
+          <strong>Price (ETH)</strong>: <span class="item-price"></span><br />
+          <strong>Inventory</strong>: <span class="item-inventory"></span><br/>
+          <strong>Sold by</strong>: <span class="item-seller"></span><br />
+        </div>
+        <div class="panel-footer">
+          <button type="button" class="btn btn-primary btn-success btn-buy" onclick="$('#buy_item_quantity').attr('max', $(this).attr('setmax')); $('#buy_item_submit_button').attr('data-id', $(this).attr('data-id')); $('#buy_item_submit_button').attr('data-value', $(this).attr('data-value')); $('#buyItem').modal('show')">Buy</button>
+          <button type="button" class="btn btn-primary btn-success btn-update" onclick="$('#updateItem').modal('show'); $('#update_item_id').val($(this).attr('data').split(',')[0]); $('#update_item_name').val($(this).attr('data').split(',')[1]); $('#update_item_price').val($(this).attr('data').split(',')[2]); $('#update_item_inventory').val($(this).attr('data').split(',')[3]); $('#update_item_description').val($(this).attr('data').split(',')[4]);">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="orderTemplate" style="display: none;">
+    <div class="row-lg-12">
+      <div class="panel panel-default panel-order">
+        <div class="panel-heading">
+          <h4 class="order-panel-title"></h4>
+        </div>
+        <div class="panel-body">
+          <strong>ID</strong>: <span class="order-id"></span><br />
+          <strong>Item ID</strong>: <span class="order-itemid"></span><br />
+          <strong>Quantity</strong>: <span class="order-quantity"></span><br/>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal form to register -->
+  <div class="modal fade" id="registerBuyer" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Buyer registration</h4>
+        </div>
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <form>
+                <div class="form-group">
+                  <label for="buyer_register_name">Buyer name</label>
+                  <input type="text" class="form-control" id="buyer_register_name">
+                </div>
+                <div class="form-group">
+                  <label for="buyer_register_email">Buyer email</label>
+                  <input type="text" class="form-control" id="buyer_register_email">
+                </div>
+                <div class="form-group">
+                  <label for="buyer_register_pobox">Buyer P.O.Box</label>
+                  <input type="text" class="form-control" id="buyer_register_pobox">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-success" data-dismiss="modal" onclick="App.registerBuyer(); return false;">Submit</button>
+          <button type="button" class="btn" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--END MODAL-->
+  
+  <!-- Modal form to buy an item -->
+  <div class="modal fade" id="buyItem" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Buy an item</h4>
+        </div>
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <form>
+                <div class="form-group">
+                  <label for="buy_item_quantity">Quantity</label>
+                  <input type="number" min="1" class="form-control" id="buy_item_quantity">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="buy_item_submit_button" class="btn btn-primary btn-success" data-dismiss="modal" onclick="App.buyItem(event); return false;">Submit</button>
+          <button type="button" class="btn" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!--END MODAL-->
+
+  <!-- Modal form to sell an item -->
+  <div class="modal fade" id="sellItem" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Sell your item</h4>
+        </div>
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <form id="sellForm">
+                <div class="form-group">
+                  <label for="item_name">Item name</label>
+                  <input type="text" class="form-control" id="item_name" placeholder="Enter the name of your item">
+                </div>
+                <div class="form-group">
+                  <label for="item_price">Price in ETH</label>
+                  <input type="number" class="form-control" id="item_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?"
+                    step="0.01">
+                </div>
+                <div class="form-group">
+                  <label for="item_inventory">Inventory</label>
+                  <input type="number" class="form-control" id="item_inventory" placeholder="1" pattern="[1-9]{1-3}"
+                    step="1" min="1">
+                </div>
+                <div class="form-group">
+                  <label for="item_description">Description</label>
+                  <textarea type="text" class="form-control vresize" id="item_description" placeholder="Describe your item"
+                    maxlength="255"></textarea>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-success" data-dismiss="modal" onclick="App.sellItems(); $('#sellForm').trigger('reset'); return false;">Submit</button>
+          <button type="button" class="btn" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal form to update an item -->
+  <div class="modal fade" id="updateItem" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Update item</h4>
+        </div>
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <form>
+                <div class="form-group">
+                  <label for="update_item_name">Item name</label>
+                  <input type="text" class="form-control" id="update_item_name" placeholder="Enter the name of your item">
+                </div>
+                <div class="form-group">
+                  <label for="update_item_price">Price in ETH</label>
+                  <input type="number" class="form-control" id="update_item_price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?"
+                    step="0.01">
+                </div>
+                <div class="form-group">
+                  <label for="update_item_inventory">Inventory</label>
+                  <input type="number" class="form-control" id="update_item_inventory" placeholder="1" pattern="[1-9]{1-3}"
+                    step="1" min="1">
+                </div>
+                <div class="form-group">
+                  <label for="update_item_description">Description</label>
+                  <textarea type="text" class="form-control vresize" id="update_item_description" placeholder="Describe your item"
+                    maxlength="255"></textarea>
+                </div>
+                <input type="hidden" id="update_item_id">
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-success" data-dismiss="modal" onclick="App.updateItem(); return false;">Submit</button>
+          <button type="button" class="btn" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--END MODAL-->
+  
+  <!-- Modal form to withdraw -->
+  <div class="modal fade" id="withdrawFunds" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Withdraw funds</h4>
+        </div>
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <form>
+                <div class="form-group">
+                  <label for="withdraw_account">Account address</label>
+                  <input type="text" class="form-control" id="withdraw_account" placeholder="Enter the account address">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-success" data-dismiss="modal" onclick="App.withDraw(); return false;">Submit</button>
+          <button type="button" class="btn" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--END MODAL-->
+
+  <div id="footer" class="container">
+    <nav class="navbar navbar-default navbar-fixed-bottom">
+      <div class="navbar-inner navbar-content-center text-center">
+        <p class="text-muted" credit><a href="http://chainskills.com">MyShop</a> - &copy; 2020 - <a href="https://twitter.com/sarbogast">Hassan 
+            Elsamra</a> and <a href="https://twitter.com/eloudsa">Ahmed Salem</a></p>
+      </div>
+    </nav>
+  </div>
+
+   <!-- scripts -->
+   <script src="js/particles.min.js"></script>
+   <script src="js/deepMerge.js"></script>
+   <script src="js/main.js"></script>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/web3.min.js"></script>
+  <script src="js/truffle-contract.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
